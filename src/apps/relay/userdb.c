@@ -327,7 +327,13 @@ static turn_time_t get_rest_api_timestamp(char *usname) {
   turn_time_t ts = 0;
   int ts_set = 0;
 
+  char rest_api_separator = turn_params.rest_api_separator;
   char *col = strchr(usname, turn_params.rest_api_separator);
+  if (!col && rest_api_separator != ':') {
+    // Try using the default ":" instead.
+    rest_api_separator = ':';
+    col = strchr(usname, rest_api_separator);
+  }
 
   if (col) {
     if (col == usname) {
@@ -349,7 +355,7 @@ static turn_time_t get_rest_api_timestamp(char *usname) {
         *col = 0;
         ts = (turn_time_t)atol(usname);
         ts_set = 1;
-        *col = turn_params.rest_api_separator;
+        *col = rest_api_separator;
       }
     }
   }
@@ -363,7 +369,15 @@ static turn_time_t get_rest_api_timestamp(char *usname) {
 
 static char *get_real_username(char *usname) {
   if (usname[0] && turn_params.use_auth_secret_with_timestamp) {
+
+    char rest_api_separator = turn_params.rest_api_separator;
     char *col = strchr(usname, turn_params.rest_api_separator);
+    if (!col && rest_api_separator != ':') {
+      // Try using the default ":" instead.
+      rest_api_separator = ':';
+      col = strchr(usname, rest_api_separator);
+    }
+
     if (col) {
       if (col == usname) {
         usname += 1;
@@ -382,7 +396,7 @@ static char *get_real_username(char *usname) {
         } else {
           *col = 0;
           usname = strdup(usname);
-          *col = turn_params.rest_api_separator;
+          *col = rest_api_separator;
           return usname;
         }
       }
